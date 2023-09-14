@@ -69,6 +69,5 @@ export * from './Tracing.js';
 export * from './USKeyboardLayout.js';
 export * from './WaitTask.js';
 export * from './WebWorker.js';
-export * from './fetch.js';
 export * from './types.js';
 export * from './util.js';

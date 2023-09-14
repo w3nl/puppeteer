@@ -31,7 +31,7 @@
     "url": "https://github.com/puppeteer/puppeteer/tree/main/packages/puppeteer-core"
   },
   "engines": {
-    "node": ">=16.3.0"
+    "node": ">=18.17.1"
   },
   "scripts": {
     "build:docs": "wireit",
@@ -142,7 +142,6 @@
   "dependencies": {
     "@puppeteer/browsers": "1.7.1",
     "chromium-bidi": "0.4.27",
-    "cross-fetch": "4.0.0",
     "debug": "4.3.4",
     "devtools-protocol": "0.0.1179426",
     "ws": "8.14.1"

@@ -316,7 +316,7 @@ jobs:
           - macos-latest
           - windows-latest
         node:
-          - 18
+          - lts/*
         pkg_manager:
           - npm
     steps:
