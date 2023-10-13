@@ -579,12 +579,12 @@ export function validateDialogType(
 /**
  * @internal
  */
-export function timeout(ms: number): Observable<never> {
+export function timeout(ms: number, message?: string): Observable<never> {
   return ms === 0
     ? NEVER
     : timer(ms).pipe(
         map(() => {
-          throw new TimeoutError(`Timed out after waiting ${ms}ms`);
+          throw new TimeoutError(message ?? `Timed out after waiting ${ms}ms`);
         })
       );
 }

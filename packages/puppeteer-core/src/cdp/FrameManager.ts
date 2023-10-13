@@ -16,12 +16,24 @@
 
 import type {Protocol} from 'devtools-protocol';
 
+import {
+  catchError,
+  EMPTY,
+  firstValueFrom,
+  fromEvent,
+  raceWith,
+} from '../../third_party/rxjs/rxjs.js';
 import {type CDPSession, CDPSessionEvent} from '../api/CDPSession.js';
 import {FrameEvent} from '../api/Frame.js';
 import type {Page} from '../api/Page.js';
 import {EventEmitter, type EventType} from '../common/EventEmitter.js';
 import type {TimeoutSettings} from '../common/TimeoutSettings.js';
-import {debugError, PuppeteerURL, UTILITY_WORLD_NAME} from '../common/util.js';
+import {
+  debugError,
+  PuppeteerURL,
+  timeout,
+  UTILITY_WORLD_NAME,
+} from '../common/util.js';
 import {assert} from '../util/assert.js';
 import {Deferred} from '../util/Deferred.js';
 import {disposeSymbol} from '../util/disposable.js';
@@ -142,18 +154,22 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
     for (const child of mainFrame.childFrames()) {
       this.#removeFramesRecursively(child);
     }
-    const swapped = Deferred.create<void>({
-      timeout: TIME_FOR_WAITING_FOR_SWAP,
-      message: 'Frame was not swapped',
-    });
-    mainFrame.once(FrameEvent.FrameSwappedByActivation, () => {
-      swapped.resolve();
-    });
-    try {
-      await swapped.valueOrThrow();
-    } catch (err) {
-      this.#removeFramesRecursively(mainFrame);
-    }
+
+    await firstValueFrom(
+      fromEvent(
+        mainFrame,
+        FrameEvent.FrameSwappedByActivation as unknown as string
+      )
+        .pipe(
+          raceWith(timeout(TIME_FOR_WAITING_FOR_SWAP, 'Frame was not swapped'))
+        )
+        .pipe(
+          catchError(() => {
+            this.#removeFramesRecursively(mainFrame);
+            return EMPTY;
+          })
+        )
+    );
   }
 
   /**
